@@ -1,41 +1,42 @@
+# frozen_string_literal: true
+
 require 'maxmind_database'
 
 namespace :geocoder do
   namespace :maxmind do
     namespace :geolite do
+      desc 'Download and load/refresh MaxMind GeoLite City data'
+      task load: %i[download extract insert]
 
-      desc "Download and load/refresh MaxMind GeoLite City data"
-      task load: [:download, :extract, :insert]
-
-      desc "Download MaxMind GeoLite City data"
+      desc 'Download MaxMind GeoLite City data'
       task :download do
         p = MaxmindTask.check_for_package!
-        MaxmindTask.download!(p, dir: ENV['DIR'] || "tmp/")
+        MaxmindTask.download!(p, dir: ENV['DIR'] || 'tmp/')
       end
 
-      desc "Extract (unzip) MaxMind GeoLite City data"
+      desc 'Extract (unzip) MaxMind GeoLite City data'
       task :extract do
         p = MaxmindTask.check_for_package!
-        MaxmindTask.extract!(p, dir: ENV['DIR'] || "tmp/")
+        MaxmindTask.extract!(p, dir: ENV['DIR'] || 'tmp/')
       end
 
-      desc "Load/refresh MaxMind GeoLite City data"
+      desc 'Load/refresh MaxMind GeoLite City data'
       task insert: [:environment] do
         p = MaxmindTask.check_for_package!
-        MaxmindTask.insert!(p, dir: ENV['DIR'] || "tmp/")
+        MaxmindTask.insert!(p, dir: ENV['DIR'] || 'tmp/')
       end
     end
   end
 end
 
 module MaxmindTask
-  extend self
+  module_function
 
   def check_for_package!
     if %w[city country].include?(p = ENV['PACKAGE'])
-      return p
+      p
     else
-      puts "Please specify PACKAGE=city or PACKAGE=country"
+      puts 'Please specify PACKAGE=city or PACKAGE=country'
       exit
     end
   end
@@ -49,7 +50,7 @@ module MaxmindTask
     begin
       require 'zip'
     rescue LoadError
-      puts "Please install gem: rubyzip (>= 1.0.0)"
+      puts 'Please install gem: rubyzip (>= 1.0.0)'
       exit
     end
     require 'fileutils'

@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module Geocoder
   class Cache
-
     def initialize(store, prefix)
       @store = store
       @prefix = prefix
@@ -10,15 +11,14 @@ module Geocoder
     # Read from the Cache.
     #
     def [](url)
-      interpret case
-        when store.respond_to?(:[])
-          store[key_for(url)]
-        when store.respond_to?(:get)
-          store.get key_for(url)
-        when store.respond_to?(:read)
-          store.read key_for(url)
-      end
-    rescue => e
+      interpret if store.respond_to?(:[])
+                  store[key_for(url)]
+                elsif store.respond_to?(:get)
+                  store.get key_for(url)
+                elsif store.respond_to?(:read)
+                  store.read key_for(url)
+                end
+    rescue StandardError => e
       warn "Geocoder cache read error: #{e}"
     end
 
@@ -26,15 +26,14 @@ module Geocoder
     # Write to the Cache.
     #
     def []=(url, value)
-      case
-        when store.respond_to?(:[]=)
-          store[key_for(url)] = value
-        when store.respond_to?(:set)
-          store.set key_for(url), value
-        when store.respond_to?(:write)
-          store.write key_for(url), value
+      if store.respond_to?(:[]=)
+        store[key_for(url)] = value
+      elsif store.respond_to?(:set)
+        store.set key_for(url), value
+      elsif store.respond_to?(:write)
+        store.write key_for(url), value
       end
-    rescue => e
+    rescue StandardError => e
       warn "Geocoder cache write error: #{e}"
     end
 
@@ -45,20 +44,20 @@ module Geocoder
     def expire(url)
       if url == :all
         if store.respond_to?(:keys)
-          urls.each{ |u| expire(u) }
+          urls.each { |u| expire(u) }
         else
-          raise(NoMethodError, "The Geocoder cache store must implement `#keys` for `expire(:all)` to work")
+          raise(NoMethodError, 'The Geocoder cache store must implement `#keys` for `expire(:all)` to work')
         end
       else
         expire_single_url(url)
       end
     end
 
-
     private # ----------------------------------------------------------------
 
-    def prefix; @prefix; end
-    def store; @store; end
+    attr_reader :prefix
+
+    attr_reader :store
 
     ##
     # Cache key for a given URL.
@@ -72,14 +71,14 @@ module Geocoder
     # that have non-nil values.
     #
     def keys
-      store.keys.select{ |k| k.match(/^#{prefix}/) and self[k] }
+      store.keys.select { |k| k.match(/^#{prefix}/) and self[k] }
     end
 
     ##
     # Array of cached URLs.
     #
     def urls
-      keys.map{ |k| k[/^#{prefix}(.*)/, 1] }
+      keys.map { |k| k[/^#{prefix}(.*)/, 1] }
     end
 
     ##
@@ -87,7 +86,7 @@ module Geocoder
     # (Some key/value stores return empty string instead of nil.)
     #
     def interpret(value)
-      value == "" ? nil : value
+      value == '' ? nil : value
     end
 
     def expire_single_url(url)

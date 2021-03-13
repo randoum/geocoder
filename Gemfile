@@ -1,17 +1,19 @@
-source "https://rubygems.org"
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
 
 group :development, :test do
-  gem 'rake'
-  gem 'mongoid'
   gem 'bson_ext', platforms: :ruby
   gem 'geoip'
-  gem 'rubyzip'
+  gem 'mongoid'
   gem 'rails', '~>5.1.0'
+  gem 'rake'
+  gem 'rubyzip'
   gem 'test-unit' # needed for Ruby >=2.2.0
 
   platforms :jruby do
-    gem 'jruby-openssl'
     gem 'jgeoip'
+    gem 'jruby-openssl'
   end
 
   platforms :rbx do
@@ -29,14 +31,14 @@ group :test do
   gem 'webmock'
 
   platforms :ruby do
-    gem 'pg', '~> 0.11'
     gem 'mysql2', '~> 0.3.11'
+    gem 'pg', '~> 0.11'
   end
 
   platforms :jruby do
+    gem 'activerecord-jdbcpostgresql-adapter'
     gem 'jdbc-mysql'
     gem 'jdbc-sqlite3'
-    gem 'activerecord-jdbcpostgresql-adapter'
   end
 end
 

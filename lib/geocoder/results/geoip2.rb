@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require 'geocoder/results/base'
 
 module Geocoder
   module Result
     class Geoip2 < Base
-
       def coordinates
         %w[latitude longitude].map do |l|
           data.fetch('location', {}).fetch(l, 0.0)

@@ -1,12 +1,13 @@
+# frozen_string_literal: true
+
 require 'geocoder/lookups/base'
-require "geocoder/results/geoportail_lu"
+require 'geocoder/results/geoportail_lu'
 
 module Geocoder
   module Lookup
     class GeoportailLu < Base
-
       def name
-        "Geoportail.lu"
+        'Geoportail.lu'
       end
 
       private # ---------------------------------------------------------------
@@ -33,15 +34,15 @@ module Geocoder
 
       def search_params(query)
         {
-            queryString: query.sanitized_text
+          queryString: query.sanitized_text
         }
       end
 
       def reverse_geocode_params(query)
         lat_lon = query.coordinates
         {
-            lat: lat_lon.first,
-            lon: lat_lon.last
+          lat: lat_lon.first,
+          lon: lat_lon.last
         }
       end
 
@@ -51,12 +52,13 @@ module Geocoder
 
       def results(query)
         return [] unless doc = fetch_data(query)
+
         if doc['success'] == true
           result = doc['results']
         else
           result = []
           raise_error(Geocoder::Error) ||
-              warn("Geportail.lu Geocoding API error")
+            warn('Geportail.lu Geocoding API error')
         end
         result
       end

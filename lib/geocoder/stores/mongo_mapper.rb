@@ -1,13 +1,17 @@
+# frozen_string_literal: true
+
 require 'geocoder/stores/base'
 require 'geocoder/stores/mongo_base'
 
-module Geocoder::Store
-  module MongoMapper
-    include Base
-    include MongoBase
+module Geocoder
+  module Store
+    module MongoMapper
+      include Base
+      include MongoBase
 
-    def self.included(base)
-      MongoBase.included_by_model(base)
+      def self.included(base)
+        MongoBase.included_by_model(base)
+      end
     end
   end
 end

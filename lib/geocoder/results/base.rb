@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module Geocoder
   module Result
     class Base
-
       # data (hash) fetched from geocoding service
       attr_accessor :data
 
@@ -25,14 +26,14 @@ module Geocoder
       # return properly formatted addresses and those should be funneled
       # through this method.
       #
-      def address(format = :full)
-        if state_code.to_s != ""
-          s = ", #{state_code}"
-        elsif state.to_s != ""
-          s = ", #{state}"
-        else
-          s = ""
-        end
+      def address(_format = :full)
+        s = if state_code.to_s != ''
+              ", #{state_code}"
+            elsif state.to_s != ''
+              ", #{state}"
+            else
+              ''
+            end
         "#{city}#{s} #{postal_code}, #{country}".sub(/^[ ,]*/, '')
       end
 
@@ -52,7 +53,7 @@ module Geocoder
       end
 
       def state
-        fail
+        raise
       end
 
       def province
@@ -60,7 +61,7 @@ module Geocoder
       end
 
       def state_code
-        fail
+        raise
       end
 
       def province_code
@@ -68,11 +69,11 @@ module Geocoder
       end
 
       def country
-        fail
+        raise
       end
 
       def country_code
-        fail
+        raise
       end
     end
   end

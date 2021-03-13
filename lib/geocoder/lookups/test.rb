@@ -1,12 +1,13 @@
+# frozen_string_literal: true
+
 require 'geocoder/lookups/base'
 require 'geocoder/results/test'
 
 module Geocoder
   module Lookup
     class Test < Base
-
       def name
-        "Test"
+        'Test'
       end
 
       def self.add_stub(query_text, results)
@@ -18,10 +19,11 @@ module Geocoder
       end
 
       def self.read_stub(query_text)
-        stubs.fetch(query_text) {
+        stubs.fetch(query_text) do
           return @default_stub unless @default_stub.nil?
+
           raise ArgumentError, "unknown stub request #{query_text}"
-        }
+        end
       end
 
       def self.stubs
@@ -42,7 +44,6 @@ module Geocoder
       def results(query)
         Geocoder::Lookup::Test.read_stub(query.text)
       end
-
     end
   end
 end

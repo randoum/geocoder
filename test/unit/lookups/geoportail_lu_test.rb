@@ -1,8 +1,8 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class GeoportailLuTest < GeocoderTestCase
-
   def setup
     Geocoder.configure(lookup: :geoportail_lu)
   end
@@ -59,7 +59,7 @@ class GeoportailLuTest < GeocoderTestCase
   private
 
   def assert_country_code(result)
-    [:state_code, :country_code, :province_code].each do |method|
+    %i[state_code country_code province_code].each do |method|
       assert_equal 'LU', result.send(method)
     end
   end

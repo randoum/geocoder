@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'geocoder/lookups/base'
 require 'geocoder/results/geoip2'
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Geocoder
   class Query
     attr_accessor :text, :options
@@ -32,11 +34,11 @@ module Geocoder
     # appropriate to the Query text.
     #
     def lookup
-      if !options[:street_address] and (options[:ip_address] or ip_address?)
-        name = options[:ip_lookup] || Configuration.ip_lookup || Geocoder::Lookup.ip_services.first
-      else
-        name = options[:lookup] || Configuration.lookup || Geocoder::Lookup.street_services.first
-      end
+      name = if !options[:street_address] && (options[:ip_address] || ip_address?)
+               options[:ip_lookup] || Configuration.ip_lookup || Geocoder::Lookup.ip_services.first
+             else
+               options[:lookup] || Configuration.lookup || Geocoder::Lookup.street_services.first
+             end
       Lookup.get(name)
     end
 
@@ -63,7 +65,9 @@ module Geocoder
     # dot-delimited numbers.
     #
     def ip_address?
-      IpAddress.new(text).valid? rescue false
+      IpAddress.new(text).valid?
+    rescue StandardError
+      false
     end
 
     ##
@@ -93,7 +97,7 @@ module Geocoder
     def coordinates?
       text.is_a?(Array) or (
         text.is_a?(String) and
-        !!text.to_s.match(/\A-?[0-9\.]+, *-?[0-9\.]+\z/)
+        !text.to_s.match(/\A-?[0-9.]+, *-?[0-9.]+\z/).nil?
       )
     end
 
@@ -119,7 +123,7 @@ module Geocoder
     private # ----------------------------------------------------------------
 
     def params_given?
-      !!(options[:params].is_a?(Hash) and options[:params].keys.size > 0)
+      !!(options[:params].is_a?(Hash) and options[:params].keys.size.positive?)
     end
   end
 end

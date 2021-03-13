@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This class implements an ActiveJob job for performing reverse-geocoding
 # asynchronously. Example usage:
 
@@ -17,21 +19,17 @@ class ReverseGeocodeJob < ActiveJob::Base
   def perform(location)
     address = address(location)
 
-    if address.present?
-      location.update(address: address)
-    end
+    location.update(address: address) if address.present?
   end
 
   private
 
   def address(location)
     Geocoder.address(location.coordinates)
-  rescue => exception
-    MonitoringService.notify(exception, location: { id: location.id })
+  rescue StandardError => e
+    MonitoringService.notify(e, location: { id: location.id })
 
-    if retryable?(exception)
-      raise exception
-    end
+    raise e if retryable?(e)
   end
 
   def retryable?(exception)

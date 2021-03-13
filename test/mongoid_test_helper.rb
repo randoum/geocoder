@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rubygems'
 require 'test/unit'
 require 'test_helper'
@@ -7,7 +9,7 @@ require 'geocoder/models/mongoid'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-if (::Mongoid::VERSION >= "3")
+if ::Mongoid::VERSION >= '3'
   Mongoid.logger = Logger.new($stderr, :debug)
 else
   Mongoid.configure do |config|
@@ -22,10 +24,10 @@ class PlaceUsingMongoid
   include Mongoid::Document
   include Geocoder::Model::Mongoid
 
-  geocoded_by :address, :coordinates => :location
+  geocoded_by :address, coordinates: :location
   field :name
   field :address
-  field :location, :type => Array
+  field :location, type: Array
 
   def initialize(name, address)
     super()
@@ -38,8 +40,8 @@ class PlaceUsingMongoidWithoutIndex
   include Mongoid::Document
   include Geocoder::Model::Mongoid
 
-  field :location, :type => Array
-  geocoded_by :location, :skip_index => true
+  field :location, type: Array
+  geocoded_by :location, skip_index: true
 end
 
 class PlaceUsingMongoidReverseGeocoded
@@ -47,7 +49,7 @@ class PlaceUsingMongoidReverseGeocoded
   include Geocoder::Model::Mongoid
 
   field :address
-  field :coordinates, :type => Array
+  field :coordinates, type: Array
   reverse_geocoded_by :coordinates
 
   def initialize(name, latitude, longitude)
@@ -61,16 +63,16 @@ class PlaceUsingMongoidWithCustomResultsHandling
   include Mongoid::Document
   include Geocoder::Model::Mongoid
 
-  field :location, :type => Array
+  field :location, type: Array
   field :coords_string
   field :name
   field :address
-  geocoded_by :address, :coordinates => :location do |obj,results|
-    if result = results.first
-      obj.coords_string = "#{result.latitude},#{result.longitude}"
-    else
-      obj.coords_string = "NOT FOUND"
-    end
+  geocoded_by :address, coordinates: :location do |obj, results|
+    obj.coords_string = if result = results.first
+                          "#{result.latitude},#{result.longitude}"
+                        else
+                          'NOT FOUND'
+                        end
   end
 
   def initialize(name, address)
@@ -86,9 +88,9 @@ class PlaceUsingMongoidReverseGeocodedWithCustomResultsHandling
 
   field :name
   field :country
-  field :coordinates, :type => Array
+  field :coordinates, type: Array
 
-  reverse_geocoded_by :coordinates do |obj,results|
+  reverse_geocoded_by :coordinates do |obj, results|
     if result = results.first
       obj.country = result.country_code
     end

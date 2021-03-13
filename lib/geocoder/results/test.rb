@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require 'geocoder/results/base'
 
 module Geocoder
   module Result
     class Test < Base
-
       def self.add_result_attribute(attr)
         begin
           remove_method(attr) if method_defined?(attr)
@@ -16,8 +17,8 @@ module Geocoder
       end
 
       %w[coordinates neighborhood city state state_code sub_state
-      sub_state_code province province_code postal_code country
-      country_code address street_address street_number route geometry].each do |attr|
+         sub_state_code province province_code postal_code country
+         country_code address street_address street_number route geometry].each do |attr|
         add_result_attribute(attr)
       end
 

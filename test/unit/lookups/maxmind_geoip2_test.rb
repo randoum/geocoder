@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class MaxmindGeoip2Test < GeocoderTestCase
@@ -26,7 +27,7 @@ class MaxmindGeoip2Test < GeocoderTestCase
   end
 
   def test_no_results
-    results = Geocoder.search("no results")
+    results = Geocoder.search('no results')
     assert_equal 0, results.length
   end
 

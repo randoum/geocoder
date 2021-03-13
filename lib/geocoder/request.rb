@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'ipaddr'
 
 module Geocoder
   module Request
-
     # The location() method is vulnerable to trivial IP spoofing.
     #   Don't use it in authorization/authentication code, or any
     #   other security-sensitive application.  Use safe_location
@@ -33,18 +34,17 @@ module Geocoder
     #   where the forwarded_for headers, possibly containing lists,
     #   are arbitrarily preferred over headers expected to contain a
     #   single address.
-    GEOCODER_CANDIDATE_HEADERS = ['HTTP_X_FORWARDED_FOR',
-                                  'HTTP_X_FORWARDED',
-                                  'HTTP_FORWARDED_FOR',
-                                  'HTTP_FORWARDED',
-                                  'HTTP_X_CLIENT_IP',
-                                  'HTTP_CLIENT_IP',
-                                  'HTTP_X_REAL_IP',
-                                  'HTTP_X_CLUSTER_CLIENT_IP',
-                                  'REMOTE_ADDR']
+    GEOCODER_CANDIDATE_HEADERS = %w[HTTP_X_FORWARDED_FOR
+                                    HTTP_X_FORWARDED
+                                    HTTP_FORWARDED_FOR
+                                    HTTP_FORWARDED
+                                    HTTP_X_CLIENT_IP
+                                    HTTP_CLIENT_IP
+                                    HTTP_X_REAL_IP
+                                    HTTP_X_CLUSTER_CLIENT_IP
+                                    REMOTE_ADDR].freeze
 
     def geocoder_spoofable_ip
-
       # We could use a more sophisticated IP-guessing algorithm here,
       # in which we'd try to resolve the use of different headers by
       # different proxies.  The idea is that by comparing IPs repeated
@@ -54,13 +54,13 @@ module Geocoder
       # be worth the performance tradeoff, since this method is likely
       # to be called on every request in a lot of applications.
       GEOCODER_CANDIDATE_HEADERS.each do |header|
-        if @env.has_key? header
-          addrs = geocoder_split_ip_addresses(@env[header])
-          addrs = geocoder_remove_port_from_addresses(addrs)
-          addrs = geocoder_reject_non_ipv4_addresses(addrs)
-          addrs = geocoder_reject_trusted_ip_addresses(addrs)
-          return addrs.first if addrs.any?
-        end
+        next unless @env.key? header
+
+        addrs = geocoder_split_ip_addresses(@env[header])
+        addrs = geocoder_remove_port_from_addresses(addrs)
+        addrs = geocoder_reject_non_ipv4_addresses(addrs)
+        addrs = geocoder_reject_trusted_ip_addresses(addrs)
+        return addrs.first if addrs.any?
       end
 
       @env['REMOTE_ADDR']
@@ -83,7 +83,7 @@ module Geocoder
     def geocoder_remove_port_from_addresses(ip_addresses)
       ip_addresses.map do |ip|
         # IPv4
-        if ip.count('.') > 0
+        if ip.count('.').positive?
           ip.split(':').first
         # IPv6 bracket notation
         elsif match = ip.match(/\[(\S+)\]/)
@@ -97,18 +97,18 @@ module Geocoder
 
     def geocoder_reject_non_ipv4_addresses(ip_addresses)
       ips = []
-      for ip in ip_addresses
+      ip_addresses.each do |ip|
         begin
           valid_ip = IPAddr.new(ip)
-        rescue
+        rescue StandardError
           valid_ip = false
         end
         ips << valid_ip.to_s if valid_ip
       end
-      return ips.any? ? ips : ip_addresses
+      ips.any? ? ips : ip_addresses
     end
   end
 end
 
-ActionDispatch::Request.__send__(:include, Geocoder::Request) if defined?(ActionDispatch::Request)
-Rack::Request.__send__(:include, Geocoder::Request) if defined?(Rack::Request)
+ActionDispatch::Request.include Geocoder::Request if defined?(ActionDispatch::Request)
+Rack::Request.include Geocoder::Request if defined?(Rack::Request)

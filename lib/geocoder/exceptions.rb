@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'timeout'
 
 module Geocoder
-
   class Error < StandardError
   end
 
@@ -36,5 +37,4 @@ module Geocoder
 
   class NetworkError < Error
   end
-
 end

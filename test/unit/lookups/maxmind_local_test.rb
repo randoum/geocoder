@@ -1,8 +1,8 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class MaxmindLocalTest < GeocoderTestCase
-
   def setup
     Geocoder.configure(ip_lookup: :maxmind_local)
   end

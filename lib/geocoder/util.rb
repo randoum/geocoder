@@ -22,7 +22,7 @@ module Geocoder
     #
     def self.recursive_hash_merge(h1, h2)
       h1.merge!(h2) do |_key, oldval, newval|
-        oldval.class == h1.class ? self.recursive_hash_merge(oldval, newval) : newval
+        oldval.instance_of?(h1.class) ? recursive_hash_merge(oldval, newval) : newval
       end
     end
   end

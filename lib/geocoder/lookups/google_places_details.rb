@@ -1,15 +1,17 @@
-require "geocoder/lookups/google"
-require "geocoder/results/google_places_details"
+# frozen_string_literal: true
+
+require 'geocoder/lookups/google'
+require 'geocoder/results/google_places_details'
 
 module Geocoder
   module Lookup
     class GooglePlacesDetails < Google
       def name
-        "Google Places Details"
+        'Google Places Details'
       end
 
       def required_api_key_parts
-        ["key"]
+        ['key']
       end
 
       def supported_protocols
@@ -18,7 +20,7 @@ module Geocoder
 
       private
 
-      def base_query_url(query)
+      def base_query_url(_query)
         "#{protocol}://maps.googleapis.com/maps/api/place/details/json?"
       end
 

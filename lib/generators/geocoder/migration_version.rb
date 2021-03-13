@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Geocoder
   module Generators
     module MigrationVersion
@@ -6,9 +8,7 @@ module Geocoder
       end
 
       def migration_version
-        if rails_5?
-          "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]"
-        end
+        "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]" if rails_5?
       end
     end
   end

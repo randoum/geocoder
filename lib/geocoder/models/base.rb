@@ -1,27 +1,27 @@
-module Geocoder
+# frozen_string_literal: true
 
+module Geocoder
   ##
   # Methods for invoking Geocoder in a model.
   #
   module Model
     module Base
-
       def geocoder_options
         if defined?(@geocoder_options)
           @geocoder_options
         elsif superclass.respond_to?(:geocoder_options)
-          superclass.geocoder_options || { }
+          superclass.geocoder_options || {}
         else
-          { }
+          {}
         end
       end
 
       def geocoded_by
-        fail
+        raise
       end
 
       def reverse_geocoded_by
-        fail
+        raise
       end
 
       private # ----------------------------------------------------------------

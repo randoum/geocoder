@@ -1,8 +1,8 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class BanDataGouvFrTest < GeocoderTestCase
-
   def setup
     Geocoder.configure(lookup: :ban_data_gouv_fr)
   end
@@ -18,7 +18,8 @@ class BanDataGouvFrTest < GeocoderTestCase
     query = Geocoder::Query.new('13 rue yves toudic, 75010 Paris', lat: 48.789, lon: 2.789)
     lookup = Geocoder::Lookup.get(:ban_data_gouv_fr)
     res = lookup.query_url(query)
-    assert_equal 'https://api-adresse.data.gouv.fr/search/?lat=48.789&lon=2.789&q=13+rue+yves+toudic%2C+75010+Paris', res
+    assert_equal 'https://api-adresse.data.gouv.fr/search/?lat=48.789&lon=2.789&q=13+rue+yves+toudic%2C+75010+Paris',
+      res
   end
 
   def test_query_for_reverse_geocode
@@ -60,7 +61,7 @@ class BanDataGouvFrTest < GeocoderTestCase
     assert_equal '75000', result.postal_code
     assert_equal 'France', result.country
     assert_equal 'FR', result.country_code
-    assert_equal(2244000, result.population)
+    assert_equal(2_244_000, result.population)
     assert_equal 'Paris', result.city
     assert_equal 'Paris', result.city_name
     assert_equal '75056', result.city_code
@@ -81,7 +82,7 @@ class BanDataGouvFrTest < GeocoderTestCase
     assert_equal 'France', result.country
     assert_equal 'FR', result.country_code
     assert_equal(5, result.administrative_weight)
-    assert_equal(255100, result.population)
+    assert_equal(255_100, result.population)
     assert_equal '34', result.department_code
     assert_equal 'Hérault', result.department_name
     assert_equal 'Occitanie', result.region_name
@@ -135,11 +136,10 @@ class BanDataGouvFrTest < GeocoderTestCase
     WebMock.disable!
   end
 
-
   private
 
   def assert_country_code(result)
-    [:state_code, :country_code, :province_code].each do |method|
+    %i[state_code country_code province_code].each do |method|
       assert_equal 'FR', result.send(method)
     end
   end

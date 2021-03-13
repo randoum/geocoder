@@ -1,28 +1,26 @@
+# frozen_string_literal: true
+
 require 'bundler'
 Bundler::GemHelper.install_tasks
 
-ACCEPTED_DB_VALUES = %w(sqlite postgres mysql)
+ACCEPTED_DB_VALUES = %w[sqlite postgres mysql].freeze
 DATABASE_CONFIG_FILE = 'test/database.yml'
 
 def config
   require 'yaml'
-  YAML.load(File.open(DATABASE_CONFIG_FILE))
+  YAML.safe_load(File.open(DATABASE_CONFIG_FILE))
 end
 
 namespace :db do
   task :create do
-    if ACCEPTED_DB_VALUES.include? ENV['DB']
-      Rake::Task["db:#{ENV['DB']}:create"].invoke
-    end
+    Rake::Task["db:#{ENV['DB']}:create"].invoke if ACCEPTED_DB_VALUES.include? ENV['DB']
   end
 
   task :drop do
-    if ACCEPTED_DB_VALUES.include? ENV['DB']
-      Rake::Task["db:#{ENV['DB']}:drop"].invoke
-    end
+    Rake::Task["db:#{ENV['DB']}:drop"].invoke if ACCEPTED_DB_VALUES.include? ENV['DB']
   end
 
-  task :reset => [:drop, :create]
+  task reset: %i[drop create]
 
   namespace :mysql do
     desc 'Create the MySQL test databases'
@@ -67,7 +65,7 @@ Rake::TestTask.new(:integration) do |test|
   test.pattern = 'test/integration/*_test.rb'
 end
 
-task :default => [:test]
+task default: [:test]
 
 require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|

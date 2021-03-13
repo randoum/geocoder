@@ -1,4 +1,6 @@
-require "geocoder/lookups/test"
+# frozen_string_literal: true
+
+require 'geocoder/lookups/test'
 
 module Geocoder
   module Lookup
@@ -22,38 +24,38 @@ module Geocoder
     # All street address lookup services, default first.
     #
     def street_services
-      @street_services ||= [
-        :location_iq,
-        :dstk,
-        :esri,
-        :google,
-        :google_premier,
-        :google_places_details,
-        :google_places_search,
-        :bing,
-        :geocoder_ca,
-        :yandex,
-        :nationaal_georegister_nl,
-        :nominatim,
-        :mapbox,
-        :mapquest,
-        :uk_ordnance_survey_names,
-        :opencagedata,
-        :pelias,
-        :pickpoint,
-        :here,
-        :baidu,
-        :tencent,
-        :geocodio,
-        :smarty_streets,
-        :postcode_anywhere_uk,
-        :postcodes_io,
-        :geoportail_lu,
-        :ban_data_gouv_fr,
-        :test,
-        :latlon,
-        :amap,
-        :osmnames
+      @street_services ||= %i[
+        location_iq
+        dstk
+        esri
+        google
+        google_premier
+        google_places_details
+        google_places_search
+        bing
+        geocoder_ca
+        yandex
+        nationaal_georegister_nl
+        nominatim
+        mapbox
+        mapquest
+        uk_ordnance_survey_names
+        opencagedata
+        pelias
+        pickpoint
+        here
+        baidu
+        tencent
+        geocodio
+        smarty_streets
+        postcode_anywhere_uk
+        postcodes_io
+        geoportail_lu
+        ban_data_gouv_fr
+        test
+        latlon
+        amap
+        osmnames
       ]
     end
 
@@ -61,24 +63,24 @@ module Geocoder
     # All IP address lookup services, default first.
     #
     def ip_services
-      @ip_services ||= [
-        :baidu_ip,
-        :abstract_api,
-        :freegeoip,
-        :geoip2,
-        :maxmind,
-        :maxmind_local,
-        :telize,
-        :pointpin,
-        :maxmind_geoip2,
-        :ipinfo_io,
-        :ipregistry,
-        :ipapi_com,
-        :ipdata_co,
-        :db_ip_com,
-        :ipstack,
-        :ip2location,
-        :ipgeolocation
+      @ip_services ||= %i[
+        baidu_ip
+        abstract_api
+        freegeoip
+        geoip2
+        maxmind
+        maxmind_local
+        telize
+        pointpin
+        maxmind_geoip2
+        ipinfo_io
+        ipregistry
+        ipapi_com
+        ipdata_co
+        db_ip_com
+        ipstack
+        ip2location
+        ipgeolocation
       ]
     end
 
@@ -95,7 +97,6 @@ module Geocoder
       @services[name]
     end
 
-
     private # -----------------------------------------------------------------
 
     ##
@@ -107,9 +108,9 @@ module Geocoder
         require "geocoder/lookups/#{name}"
         Geocoder::Lookup.const_get(classify_name(name)).new
       else
-        valids = all_services.map(&:inspect).join(", ")
-        raise ConfigurationError, "Please specify a valid lookup for Geocoder " +
-          "(#{name.inspect} is not one of: #{valids})."
+        valids = all_services.map(&:inspect).join(', ')
+        raise ConfigurationError, 'Please specify a valid lookup for Geocoder ' \
+                                  "(#{name.inspect} is not one of: #{valids})."
       end
     end
 
@@ -117,7 +118,7 @@ module Geocoder
     # Convert an "underscore" version of a name into a "class" version.
     #
     def classify_name(filename)
-      filename.to_s.split("_").map{ |i| i[0...1].upcase + i[1..-1] }.join
+      filename.to_s.split('_').map { |i| i[0...1].upcase + i[1..] }.join
     end
   end
 end

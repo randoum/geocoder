@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'net/http'
 require 'net/https'
 require 'uri'
@@ -12,7 +14,6 @@ end
 
 module Geocoder
   module Lookup
-
     class Base
       def initialize
         @cache = nil
@@ -22,7 +23,7 @@ module Geocoder
       # Human-readable name of the geocoding API.
       #
       def name
-        fail
+        raise
       end
 
       ##
@@ -30,7 +31,7 @@ module Geocoder
       #
       def handle
         str = self.class.to_s
-        str[str.rindex(':')+1..-1].gsub(/([a-z\d]+)([A-Z])/,'\1_\2').downcase.to_sym
+        str[str.rindex(':') + 1..].gsub(/([a-z\d]+)([A-Z])/, '\1_\2').downcase.to_sym
       end
 
       ##
@@ -43,11 +44,11 @@ module Geocoder
       #
       def search(query, options = {})
         query = Geocoder::Query.new(query, options) unless query.is_a?(Geocoder::Query)
-        results(query).map{ |r|
+        results(query).map do |r|
           result = result_class.new(r)
           result.cache_hit = @cache_hit if cache
           result
-        }
+        end
       end
 
       ##
@@ -56,7 +57,7 @@ module Geocoder
       # Not necessarily implemented by all subclasses as only some lookups
       # also provide maps.
       #
-      def map_link_url(coordinates)
+      def map_link_url(_coordinates)
         nil
       end
 
@@ -83,7 +84,7 @@ module Geocoder
       # The working Cache object.
       #
       def cache
-        if @cache.nil? and store = configuration.cache
+        if @cache.nil? && (store = configuration.cache)
           @cache = Cache.new(store, configuration.cache_prefix)
         end
         @cache
@@ -95,7 +96,7 @@ module Geocoder
       # or [:https] if only HTTPS is supported.
       #
       def supported_protocols
-        [:http, :https]
+        %i[http https]
       end
 
       private # -------------------------------------------------------------
@@ -104,8 +105,8 @@ module Geocoder
       # String which, when concatenated with url_query_string(query)
       # produces the full query URL. Should include the "?" a the end.
       #
-      def base_query_url(query)
-        fail
+      def base_query_url(_query)
+        raise
       end
 
       ##
@@ -121,7 +122,7 @@ module Geocoder
       def http_client
         proxy_name = "#{protocol}_proxy"
         if proxy = configuration.send(proxy_name)
-          proxy_url = !!(proxy =~ /^#{protocol}/) ? proxy : protocol + '://' + proxy
+          proxy_url = (proxy =~ /^#{protocol}/).nil? ? "#{protocol}://#{proxy}" : proxy
           begin
             uri = URI.parse(proxy_url)
           rescue URI::InvalidURIError
@@ -137,8 +138,8 @@ module Geocoder
       ##
       # Geocoder::Result object or nil on timeout or other error.
       #
-      def results(query)
-        fail
+      def results(_query)
+        raise
       end
 
       def query_url_params(query)
@@ -147,7 +148,7 @@ module Geocoder
 
       def url_query_string(query)
         hash_to_query(
-          query_url_params(query).reject{ |key,value| value.nil? }
+          query_url_params(query).compact
         )
       end
 
@@ -163,7 +164,7 @@ module Geocoder
 
       def cache_key_params(query)
         # omit api_key and token because they may vary among requests
-        query_url_params(query).reject do |key,value|
+        query_url_params(query).reject do |key, _value|
           key.to_s.match(/(key|token)/)
         end
       end
@@ -172,7 +173,7 @@ module Geocoder
       # Class of the result objects
       #
       def result_class
-        Geocoder::Result.const_get(self.class.to_s.split(":").last)
+        Geocoder::Result.const_get(self.class.to_s.split(':').last)
       end
 
       ##
@@ -181,7 +182,7 @@ module Geocoder
       #
       def raise_error(error, message = nil)
         exceptions = configuration.always_raise
-        if exceptions == :all or exceptions.include?( error.is_a?(Class) ? error : error.class )
+        if (exceptions == :all) || exceptions.include?(error.is_a?(Class) ? error : error.class)
           raise error, message
         else
           false
@@ -193,15 +194,15 @@ module Geocoder
       #
       def fetch_data(query)
         parse_raw_data fetch_raw_data(query)
-      rescue SocketError => err
-        raise_error(err) or Geocoder.log(:warn, "Geocoding API connection cannot be established.")
-      rescue Errno::ECONNREFUSED => err
-        raise_error(err) or Geocoder.log(:warn, "Geocoding API connection refused.")
-      rescue Geocoder::NetworkError => err
-        raise_error(err) or Geocoder.log(:warn, "Geocoding API connection is either unreacheable or reset by the peer")
-      rescue Timeout::Error => err
-        raise_error(err) or Geocoder.log(:warn, "Geocoding API not responding fast enough " +
-          "(use Geocoder.configure(:timeout => ...) to set limit).")
+      rescue SocketError => e
+        raise_error(e) or Geocoder.log(:warn, 'Geocoding API connection cannot be established.')
+      rescue Errno::ECONNREFUSED => e
+        raise_error(e) or Geocoder.log(:warn, 'Geocoding API connection refused.')
+      rescue Geocoder::NetworkError => e
+        raise_error(e) or Geocoder.log(:warn, 'Geocoding API connection is either unreacheable or reset by the peer')
+      rescue Timeout::Error => e
+        raise_error(e) or Geocoder.log(:warn, 'Geocoding API not responding fast enough ' \
+          '(use Geocoder.configure(:timeout => ...) to set limit).')
       end
 
       def parse_json(data)
@@ -210,7 +211,7 @@ module Geocoder
         else
           JSON.parse(data)
         end
-      rescue
+      rescue StandardError
         unless raise_error(ResponseParseError.new(data))
           Geocoder.log(:warn, "Geocoding API's response was not valid JSON")
           Geocoder.log(:debug, "Raw response: #{data}")
@@ -229,7 +230,7 @@ module Geocoder
       # Set in configuration but not available for every service.
       #
       def protocol
-        "http" + (use_ssl? ? "s" : "")
+        "http#{use_ssl? ? 's' : ''}"
       end
 
       def valid_response?(response)
@@ -242,7 +243,7 @@ module Geocoder
       #
       def fetch_raw_data(query)
         key = cache_key(query)
-        if cache and body = cache[key]
+        if cache && (body = cache[key])
           @cache_hit = true
         else
           check_api_key_configuration!(query)
@@ -258,34 +259,37 @@ module Geocoder
               s['charset']
             end.first.to_s.split('=')
             if charset.length == 2
-              body.force_encoding(charset.last) rescue ArgumentError
+              begin
+                body.force_encoding(charset.last)
+              rescue StandardError
+                ArgumentError
+              end
             end
           end
 
-          if cache and valid_response?(response)
-            cache[key] = body
-          end
+          cache[key] = body if cache && valid_response?(response)
           @cache_hit = false
         end
         body
       end
 
       def check_response_for_errors!(response)
-        if response.code.to_i == 400
+        case response.code.to_i
+        when 400
           raise_error(Geocoder::InvalidRequest) ||
-            Geocoder.log(:warn, "Geocoding API error: 400 Bad Request")
-        elsif response.code.to_i == 401
+            Geocoder.log(:warn, 'Geocoding API error: 400 Bad Request')
+        when 401
           raise_error(Geocoder::RequestDenied) ||
-            Geocoder.log(:warn, "Geocoding API error: 401 Unauthorized")
-        elsif response.code.to_i == 402
+            Geocoder.log(:warn, 'Geocoding API error: 401 Unauthorized')
+        when 402
           raise_error(Geocoder::OverQueryLimitError) ||
-            Geocoder.log(:warn, "Geocoding API error: 402 Payment Required")
-        elsif response.code.to_i == 429
+            Geocoder.log(:warn, 'Geocoding API error: 402 Payment Required')
+        when 429
           raise_error(Geocoder::OverQueryLimitError) ||
-            Geocoder.log(:warn, "Geocoding API error: 429 Too Many Requests")
-        elsif response.code.to_i == 503
+            Geocoder.log(:warn, 'Geocoding API error: 429 Too Many Requests')
+        when 503
           raise_error(Geocoder::ServiceUnavailable) ||
-            Geocoder.log(:warn, "Geocoding API error: 503 Service Unavailable")
+            Geocoder.log(:warn, 'Geocoding API error: 503 Service Unavailable')
         end
       end
 
@@ -295,11 +299,12 @@ module Geocoder
       #
       def make_api_request(query)
         uri = URI.parse(query_url(query))
-        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, use_ssl: use_ssl?, open_timeout: configuration.timeout, read_timeout: configuration.timeout) do |client|
+        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri}")
+        http_client.start(uri.host, uri.port, use_ssl: use_ssl?, open_timeout: configuration.timeout,
+                                              read_timeout: configuration.timeout) do |client|
           configure_ssl!(client) if use_ssl?
           req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-          if configuration.basic_auth[:user] and configuration.basic_auth[:password]
+          if configuration.basic_auth[:user] && configuration.basic_auth[:password]
             req.basic_auth(
               configuration.basic_auth[:user],
               configuration.basic_auth[:password]
@@ -314,9 +319,10 @@ module Geocoder
       end
 
       def use_ssl?
-        if supported_protocols == [:https]
+        case supported_protocols
+        when [:https]
           true
-        elsif supported_protocols == [:http]
+        when [:http]
           false
         else
           configuration.use_https
@@ -341,9 +347,9 @@ module Geocoder
       #
       def hash_to_query(hash)
         require 'cgi' unless defined?(CGI) && defined?(CGI.escape)
-        hash.collect{ |p|
-          p[1].nil? ? nil : p.map{ |i| CGI.escape i.to_s } * '='
-        }.compact.sort * '&'
+        hash.collect  do |p|
+          p[1].nil? ? nil : p.map { |i| CGI.escape i.to_s } * '='
+        end.compact.sort * '&'
       end
     end
   end

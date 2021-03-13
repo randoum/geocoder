@@ -1,25 +1,25 @@
-module Geocoder
+# frozen_string_literal: true
 
+module Geocoder
   ##
   # Methods for invoking Geocoder in a model.
   #
   module Model
     module MongoBase
-
       ##
       # Set attribute names and include the Geocoder module.
       #
       def geocoded_by(address_attr, options = {}, &block)
         geocoder_init(
-          :geocode       => true,
-          :user_address  => address_attr,
-          :coordinates   => options[:coordinates] || :coordinates,
-          :geocode_block => block,
-          :units         => options[:units],
-          :method        => options[:method],
-          :skip_index    => options[:skip_index] || false,
-          :lookup        => options[:lookup],
-          :language      => options[:language]
+          geocode: true,
+          user_address: address_attr,
+          coordinates: options[:coordinates] || :coordinates,
+          geocode_block: block,
+          units: options[:units],
+          method: options[:method],
+          skip_index: options[:skip_index] || false,
+          lookup: options[:lookup],
+          language: options[:language]
         )
       end
 
@@ -28,15 +28,15 @@ module Geocoder
       #
       def reverse_geocoded_by(coordinates_attr, options = {}, &block)
         geocoder_init(
-          :reverse_geocode => true,
-          :fetched_address => options[:address] || :address,
-          :coordinates     => coordinates_attr,
-          :reverse_block   => block,
-          :units           => options[:units],
-          :method          => options[:method],
-          :skip_index      => options[:skip_index] || false,
-          :lookup          => options[:lookup],
-          :language        => options[:language]
+          reverse_geocode: true,
+          fetched_address: options[:address] || :address,
+          coordinates: coordinates_attr,
+          reverse_block: block,
+          units: options[:units],
+          method: options[:method],
+          skip_index: options[:skip_index] || false,
+          lookup: options[:lookup],
+          language: options[:language]
         )
       end
 
@@ -44,7 +44,7 @@ module Geocoder
 
       def geocoder_init(options)
         unless geocoder_initialized?
-          @geocoder_options = { }
+          @geocoder_options = {}
           require "geocoder/stores/#{geocoder_file_name}"
           include Geocoder::Store.const_get(geocoder_module_name)
         end
@@ -59,4 +59,3 @@ module Geocoder
     end
   end
 end
-

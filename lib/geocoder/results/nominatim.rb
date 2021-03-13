@@ -1,109 +1,113 @@
+# frozen_string_literal: true
+
 require 'geocoder/results/base'
 
-module Geocoder::Result
-  class Nominatim < Base
+module Geocoder
+  module Result
+    class Nominatim < Base
+      def poi
+        return @data['address'][place_type] if @data['address'].key?(place_type)
 
-    def poi
-      return @data['address'][place_type] if @data['address'].key?(place_type)
-      return nil
-    end
-
-    def house_number
-      @data['address']['house_number']
-    end
-
-    def address
-      @data['display_name']
-    end
-
-    def street
-      %w[road pedestrian highway].each do |key|
-        return @data['address'][key] if @data['address'].key?(key)
+        nil
       end
-      return nil
-    end
 
-    def city
-      %w[city town village hamlet].each do |key|
-        return @data['address'][key] if @data['address'].key?(key)
+      def house_number
+        @data['address']['house_number']
       end
-      return nil
-    end
 
-    def village
-      @data['address']['village']
-    end
+      def address
+        @data['display_name']
+      end
 
-    def town
-      @data['address']['town']
-    end
+      def street
+        %w[road pedestrian highway].each do |key|
+          return @data['address'][key] if @data['address'].key?(key)
+        end
+        nil
+      end
 
-    def state
-      @data['address']['state']
-    end
+      def city
+        %w[city town village hamlet].each do |key|
+          return @data['address'][key] if @data['address'].key?(key)
+        end
+        nil
+      end
 
-    alias_method :state_code, :state
+      def village
+        @data['address']['village']
+      end
 
-    def postal_code
-      @data['address']['postcode']
-    end
+      def town
+        @data['address']['town']
+      end
 
-    def county
-      @data['address']['county']
-    end
+      def state
+        @data['address']['state']
+      end
 
-    def country
-      @data['address']['country']
-    end
+      alias state_code state
 
-    def country_code
-      @data['address']['country_code']
-    end
+      def postal_code
+        @data['address']['postcode']
+      end
 
-    def suburb
-      @data['address']['suburb']
-    end
+      def county
+        @data['address']['county']
+      end
 
-    def city_district
-      @data['address']['city_district']
-    end
+      def country
+        @data['address']['country']
+      end
 
-    def state_district
-      @data['address']['state_district']
-    end
+      def country_code
+        @data['address']['country_code']
+      end
 
-    def neighbourhood
-      @data['address']['neighbourhood']
-    end
+      def suburb
+        @data['address']['suburb']
+      end
 
-    def municipality
-      @data['address']['municipality']
-    end
+      def city_district
+        @data['address']['city_district']
+      end
 
-    def coordinates
-      [@data['lat'].to_f, @data['lon'].to_f]
-    end
+      def state_district
+        @data['address']['state_district']
+      end
 
-    def place_class
-      @data['class']
-    end
+      def neighbourhood
+        @data['address']['neighbourhood']
+      end
 
-    def place_type
-      @data['type']
-    end
+      def municipality
+        @data['address']['municipality']
+      end
 
-    def viewport
-      south, north, west, east = @data['boundingbox'].map(&:to_f)
-      [south, west, north, east]
-    end
+      def coordinates
+        [@data['lat'].to_f, @data['lon'].to_f]
+      end
 
-    def self.response_attributes
-      %w[place_id osm_type osm_id boundingbox license
-         polygonpoints display_name class type stadium]
-    end
+      def place_class
+        @data['class']
+      end
 
-    response_attributes.each do |a|
-      unless method_defined?(a)
+      def place_type
+        @data['type']
+      end
+
+      def viewport
+        south, north, west, east = @data['boundingbox'].map(&:to_f)
+        [south, west, north, east]
+      end
+
+      def self.response_attributes
+        %w[place_id osm_type osm_id boundingbox license
+           polygonpoints display_name class type stadium]
+      end
+
+      response_attributes.each do |a|
+        next if method_defined?(a)
+
         define_method a do
           @data[a]
         end

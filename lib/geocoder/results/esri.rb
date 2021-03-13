@@ -1,75 +1,78 @@
+# frozen_string_literal: true
+
 require 'geocoder/results/base'
 
-module Geocoder::Result
-  class Esri < Base
-
-    def address
-      address_key = reverse_geocode? ? 'Address' : 'Match_addr'
-      attributes[address_key]
-    end
-
-    def city
-      if !reverse_geocode? && is_city?
-        place_name
-      else
-        attributes['City']
+module Geocoder
+  module Result
+    class Esri < Base
+      def address
+        address_key = reverse_geocode? ? 'Address' : 'Match_addr'
+        attributes[address_key]
       end
-    end
 
-    def state_code
-      attributes['Region']
-    end
+      def city
+        if !reverse_geocode? && is_city?
+          place_name
+        else
+          attributes['City']
+        end
+      end
 
-    alias_method :state, :state_code
+      def state_code
+        attributes['Region']
+      end
 
-    def country
-      country_key = reverse_geocode? ? "CountryCode" : "Country"
-      attributes[country_key]
-    end
+      alias state state_code
 
-    alias_method :country_code, :country
+      def country
+        country_key = reverse_geocode? ? 'CountryCode' : 'Country'
+        attributes[country_key]
+      end
 
-    def postal_code
-      attributes['Postal']
-    end
+      alias country_code country
 
-    def place_name
-      place_name_key = reverse_geocode? ? "Address" : "PlaceName"
-      attributes[place_name_key]
-    end
+      def postal_code
+        attributes['Postal']
+      end
 
-    def place_type
-      reverse_geocode? ? "Address" : attributes['Type']
-    end
+      def place_name
+        place_name_key = reverse_geocode? ? 'Address' : 'PlaceName'
+        attributes[place_name_key]
+      end
 
-    def coordinates
-      [geometry["y"], geometry["x"]]
-    end
+      def place_type
+        reverse_geocode? ? 'Address' : attributes['Type']
+      end
 
-    def viewport
-      north = attributes['Ymax']
-      south = attributes['Ymin']
-      east = attributes['Xmax']
-      west = attributes['Xmin']
-      [south, west, north, east]
-    end
+      def coordinates
+        [geometry['y'], geometry['x']]
+      end
 
-    private
+      def viewport
+        north = attributes['Ymax']
+        south = attributes['Ymin']
+        east = attributes['Xmax']
+        west = attributes['Xmin']
+        [south, west, north, east]
+      end
 
-    def attributes
-      reverse_geocode? ? @data['address'] : @data['locations'].first['feature']['attributes']
-    end
+      private
 
-    def geometry
-      reverse_geocode? ? @data["location"] : @data['locations'].first['feature']["geometry"]
-    end
+      def attributes
+        reverse_geocode? ? @data['address'] : @data['locations'].first['feature']['attributes']
+      end
 
-    def reverse_geocode?
-      @data['locations'].nil?
-    end
+      def geometry
+        reverse_geocode? ? @data['location'] : @data['locations'].first['feature']['geometry']
+      end
 
-    def is_city?
-      ['City', 'State Capital', 'National Capital'].include?(place_type)
+      def reverse_geocode?
+        @data['locations'].nil?
+      end
+
+      def is_city?
+        ['City', 'State Capital', 'National Capital'].include?(place_type)
+      end
     end
   end
 end

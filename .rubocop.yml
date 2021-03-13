@@ -1,0 +1,33 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.7
+  Exclude:
+    - 'db/schema.rb'
+Layout/ArgumentAlignment:
+  EnforcedStyle: with_fixed_indentation
+Layout/LineLength:
+  Exclude:
+    - 'bin/**/*'
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+Metrics/AbcSize:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Max: 8
+  Exclude:
+    - 'bin/**/*'
+Metrics/MethodLength:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'bin/**/*'
+Style/Documentation:
+  Exclude:
+    - 'db/**/*'
+    - 'spec/support/**/*'
+Style/Lambda:
+  Enabled: false

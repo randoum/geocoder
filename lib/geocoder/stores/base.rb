@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module Geocoder
   module Store
     module Base
-
       ##
       # Is this object geocoded? (Does it have latitude and longitude?)
       #
@@ -13,7 +14,7 @@ module Geocoder
       # Coordinates [lat,lon] of the object.
       #
       def to_coordinates
-        [:latitude, :longitude].map{ |i| send self.class.geocoder_options[i] }
+        %i[latitude longitude].map { |i| send self.class.geocoder_options[i] }
       end
 
       ##
@@ -25,11 +26,13 @@ module Geocoder
       def distance_to(point, units = nil)
         units ||= self.class.geocoder_options[:units]
         return nil unless geocoded?
+
         Geocoder::Calculations.distance_between(
-          to_coordinates, point, :units => units)
+          to_coordinates, point, units: units
+        )
       end
 
-      alias_method :distance_from, :distance_to
+      alias distance_from distance_to
 
       ##
       # Calculate the bearing from the object to another point.
@@ -39,8 +42,10 @@ module Geocoder
       def bearing_to(point, options = {})
         options[:method] ||= self.class.geocoder_options[:method]
         return nil unless geocoded?
+
         Geocoder::Calculations.bearing_between(
-          to_coordinates, point, options)
+          to_coordinates, point, options
+        )
       end
 
       ##
@@ -51,8 +56,10 @@ module Geocoder
       def bearing_from(point, options = {})
         options[:method] ||= self.class.geocoder_options[:method]
         return nil unless geocoded?
+
         Geocoder::Calculations.bearing_between(
-          point, to_coordinates, options)
+          point, to_coordinates, options
+        )
       end
 
       ##
@@ -60,7 +67,7 @@ module Geocoder
       # (or other as specified in +geocoded_by+). Returns coordinates (array).
       #
       def geocode
-        fail
+        raise
       end
 
       ##
@@ -68,7 +75,7 @@ module Geocoder
       # in +reverse_geocoded_by+). Returns address (string).
       #
       def reverse_geocode
-        fail
+        raise
       end
 
       private # --------------------------------------------------------------
@@ -82,20 +89,19 @@ module Geocoder
       #
       def do_lookup(reverse = false)
         options = self.class.geocoder_options
-        if reverse and options[:reverse_geocode]
+        if reverse && options[:reverse_geocode]
           query = to_coordinates
-        elsif !reverse and options[:geocode]
+        elsif !reverse && options[:geocode]
           query = send(options[:user_address])
         else
           return
         end
 
-        query_options = [:lookup, :ip_lookup, :language, :params].inject({}) do |hash, key|
-          if options.has_key?(key)
+        query_options = %i[lookup ip_lookup language params].each_with_object({}) do |key, hash|
+          if options.key?(key)
             val = options[key]
             hash[key] = val.respond_to?(:call) ? val.call(self) : val
           end
-          hash
         end
         results = Geocoder.search(query, query_options)
 

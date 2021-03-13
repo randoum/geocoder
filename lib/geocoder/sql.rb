@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 module Geocoder
   module Sql
-    extend self
+    module_function
 
     ##
     # Distance calculation for use with a database that supports POWER(),
-    # SQRT(), PI(), and trigonometric functions SIN(), COS(), ASIN(), 
+    # SQRT(), PI(), and trigonometric functions SIN(), COS(), ASIN(),
     # ATAN2().
     #
     # Based on the excellent tutorial at:
@@ -14,11 +16,11 @@ module Geocoder
       units = options[:units] || Geocoder.config.units
       earth = Geocoder::Calculations.earth_radius(units)
 
-      "#{earth} * 2 * ASIN(SQRT(" +
-        "POWER(SIN((#{latitude.to_f} - #{lat_attr}) * PI() / 180 / 2), 2) + " +
-        "COS(#{latitude.to_f} * PI() / 180) * COS(#{lat_attr} * PI() / 180) * " +
-        "POWER(SIN((#{longitude.to_f} - #{lon_attr}) * PI() / 180 / 2), 2)" +
-      "))"
+      "#{earth} * 2 * ASIN(SQRT(" \
+        "POWER(SIN((#{latitude.to_f} - #{lat_attr}) * PI() / 180 / 2), 2) + " \
+        "COS(#{latitude.to_f} * PI() / 180) * COS(#{lat_attr} * PI() / 180) * " \
+        "POWER(SIN((#{longitude.to_f} - #{lon_attr}) * PI() / 180 / 2), 2)" \
+        '))'
     end
 
     ##
@@ -39,7 +41,7 @@ module Geocoder
       # sin of 45 degrees = average x or y component of vector
       factor = Math.sin(Math::PI / 4)
 
-      "(#{dy} * ABS(#{lat_attr} - #{latitude.to_f}) * #{factor}) + " +
+      "(#{dy} * ABS(#{lat_attr} - #{latitude.to_f}) * #{factor}) + " \
         "(#{dx} * ABS(#{lon_attr} - #{longitude.to_f}) * #{factor})"
     end
 
@@ -47,8 +49,8 @@ module Geocoder
       spans = "#{lat_attr} BETWEEN #{sw_lat.to_f} AND #{ne_lat.to_f} AND "
       # handle box that spans 180 longitude
       if sw_lng.to_f > ne_lng.to_f
-        spans + "(#{lon_attr} BETWEEN #{sw_lng.to_f} AND 180 OR " +
-        "#{lon_attr} BETWEEN -180 AND #{ne_lng.to_f})"
+        spans + "(#{lon_attr} BETWEEN #{sw_lng.to_f} AND 180 OR " \
+          "#{lon_attr} BETWEEN -180 AND #{ne_lng.to_f})"
       else
         spans + "#{lon_attr} BETWEEN #{sw_lng.to_f} AND #{ne_lng.to_f}"
       end
@@ -69,24 +71,24 @@ module Geocoder
       degrees_per_radian = Geocoder::Calculations::DEGREES_PER_RADIAN
       case options[:bearing] || Geocoder.config.distances
       when :linear
-        "MOD(CAST(" +
-          "(ATAN2( " +
-            "((#{lon_attr} - #{longitude.to_f}) / #{degrees_per_radian}), " +
-            "((#{lat_attr} - #{latitude.to_f}) / #{degrees_per_radian})" +
-          ") * #{degrees_per_radian}) + 360 " +
-        "AS decimal), 360)"
+        'MOD(CAST(' \
+          '(ATAN2( ' \
+          "((#{lon_attr} - #{longitude.to_f}) / #{degrees_per_radian}), " \
+          "((#{lat_attr} - #{latitude.to_f}) / #{degrees_per_radian})" \
+          ") * #{degrees_per_radian}) + 360 " \
+          'AS decimal), 360)'
       when :spherical
-        "MOD(CAST(" +
-          "(ATAN2( " +
-            "SIN( (#{lon_attr} - #{longitude.to_f}) / #{degrees_per_radian} ) * " +
-            "COS( (#{lat_attr}) / #{degrees_per_radian} ), (" +
-              "COS( (#{latitude.to_f}) / #{degrees_per_radian} ) * SIN( (#{lat_attr}) / #{degrees_per_radian})" +
-            ") - (" +
-              "SIN( (#{latitude.to_f}) / #{degrees_per_radian}) * COS((#{lat_attr}) / #{degrees_per_radian}) * " +
-              "COS( (#{lon_attr} - #{longitude.to_f}) / #{degrees_per_radian})" +
-            ")" +
-          ") * #{degrees_per_radian}) + 360 " +
-        "AS decimal), 360)"
+        'MOD(CAST(' \
+          '(ATAN2( ' \
+          "SIN( (#{lon_attr} - #{longitude.to_f}) / #{degrees_per_radian} ) * " \
+          "COS( (#{lat_attr}) / #{degrees_per_radian} ), (" \
+          "COS( (#{latitude.to_f}) / #{degrees_per_radian} ) * SIN( (#{lat_attr}) / #{degrees_per_radian})" \
+          ') - (' \
+          "SIN( (#{latitude.to_f}) / #{degrees_per_radian}) * COS((#{lat_attr}) / #{degrees_per_radian}) * " \
+          "COS( (#{lon_attr} - #{longitude.to_f}) / #{degrees_per_radian})" \
+          ')' \
+          ") * #{degrees_per_radian}) + 360 " \
+          'AS decimal), 360)'
       end
     end
 
@@ -94,17 +96,17 @@ module Geocoder
     # Totally lame bearing calculation. Basically useless except that it
     # returns *something* in databases without trig functions.
     #
-    def approx_bearing(latitude, longitude, lat_attr, lon_attr, options = {})
-      "CASE " +
-        "WHEN (#{lat_attr} >= #{latitude.to_f} AND " +
-          "#{lon_attr} >= #{longitude.to_f}) THEN  45.0 " +
-        "WHEN (#{lat_attr} <  #{latitude.to_f} AND " +
-          "#{lon_attr} >= #{longitude.to_f}) THEN 135.0 " +
-        "WHEN (#{lat_attr} <  #{latitude.to_f} AND " +
-          "#{lon_attr} <  #{longitude.to_f}) THEN 225.0 " +
-        "WHEN (#{lat_attr} >= #{latitude.to_f} AND " +
-          "#{lon_attr} <  #{longitude.to_f}) THEN 315.0 " +
-      "END"
+    def approx_bearing(latitude, longitude, lat_attr, lon_attr, _options = {})
+      'CASE ' \
+        "WHEN (#{lat_attr} >= #{latitude.to_f} AND " \
+        "#{lon_attr} >= #{longitude.to_f}) THEN  45.0 " \
+        "WHEN (#{lat_attr} <  #{latitude.to_f} AND " \
+        "#{lon_attr} >= #{longitude.to_f}) THEN 135.0 " \
+        "WHEN (#{lat_attr} <  #{latitude.to_f} AND " \
+        "#{lon_attr} <  #{longitude.to_f}) THEN 225.0 " \
+        "WHEN (#{lat_attr} >= #{latitude.to_f} AND " \
+        "#{lon_attr} <  #{longitude.to_f}) THEN 315.0 " \
+        'END'
     end
   end
 end
